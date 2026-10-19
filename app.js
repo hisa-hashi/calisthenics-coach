@@ -1,0 +1,34 @@
+const plans={
+ A:{title:'胸・肩・腹筋',time:'約20分',items:[
+  {name:'プッシュアップ',target:'10回 × 3セット',secs:40,rest:60,id:'bI2qDaLrKCg',source:'Joanna Soh Official',cues:['頭からかかとまで一直線を保つ','肘は真横ではなく斜め後ろへ','胸を床へ近づけ、腰だけ落とさない'],alt:'難しい場合：膝を床につけ、同じ一直線を保ちます。'},
+  {name:'パイクプッシュアップ',target:'8回 × 3セット',secs:40,rest:75,id:'2b5t0Cu2nQI',source:'National Academy of Sports Medicine',cues:['お尻を高くして逆V字を作る','あごを軽く引き、頭を手の前方へ下ろす','肩をすくめず、ゆっくり押し戻す'],alt:'難しい場合：可動域を浅くし、足を手から遠ざけます。'},
+  {name:'プランク',target:'30秒 × 3セット',secs:30,rest:45,id:'bI2qDaLrKCg',source:'Joanna Soh Official',cues:['肘を肩の真下に置く','お腹とお尻に力を入れて一直線','腰を反らさず、呼吸を止めない'],alt:'難しい場合：膝を床につけて姿勢を保ちます。'},
+  {name:'デッドバグ',target:'左右8回 × 3セット',secs:48,rest:45,id:'BZYaCzbP09M',source:'E3 Rehab Exercise Library',cues:['腰を床へ軽く押しつける','対角の手足をゆっくり伸ばす','腰が浮く直前で戻る'],alt:'難しい場合：腕は固定し、脚だけ交互に動かします。'}]},
+ B:{title:'脚・お尻・体幹',time:'約22分',items:[
+  {name:'スクワット',target:'12回 × 3セット',secs:48,rest:60,id:'bI2qDaLrKCg',source:'Joanna Soh Official',cues:['足裏全体で床を押す','膝とつま先を同じ方向へ','胸を起こし、お尻を後ろへ引く'],alt:'難しい場合：椅子へ浅く座る動きで練習します。'},
+  {name:'リバースランジ',target:'左右8回 × 3セット',secs:55,rest:60,id:'bI2qDaLrKCg',source:'Joanna Soh Official',cues:['一歩後ろへ引き、前足に体重を乗せる','前膝が内側へ入らないようにする','上体を長く保ち、前足で戻る'],alt:'不安定な場合：壁や椅子に軽く手を添えます。'},
+  {name:'グルートブリッジ',target:'12回 × 3セット',secs:45,rest:45,id:'PhTDzR0TpZs',source:'Hinge Health',cues:['かかとを膝の下付近に置く','お尻を締めて骨盤を持ち上げる','腰を反りすぎず、肩から膝を一直線に'],alt:'腰に違和感があれば高さを下げ、痛みがあれば中止します。'},
+  {name:'バードドッグ',target:'左右8回 × 3セット',secs:50,rest:45,id:'egKWoMZ6cXM',source:'E3 Rehab Exercise Library',cues:['手は肩、膝は股関節の真下','骨盤を傾けず対角の手足を伸ばす','遠くへ伸び、ゆっくり戻す'],alt:'難しい場合：腕だけ、または脚だけを動かします。'}]},
+ C:{title:'全身コンディショニング',time:'約18分',items:[
+  {name:'バーピー',target:'6回 × 3セット',secs:40,rest:75,id:'qLBImHhCXSw',source:'Well+Good',cues:['しゃがんでから手を床につく','プランクでは肩からかかとを一直線に','着地は静かに、膝をつま先方向へ'],alt:'低負荷版：ジャンプとプッシュアップを省き、足を片方ずつ引きます。'},
+  {name:'スクワット',target:'15回 × 3セット',secs:50,rest:45,id:'bI2qDaLrKCg',source:'Joanna Soh Official',cues:['足裏全体で床を押す','膝とつま先を同じ方向へ','立ち上がりでお尻を締める'],alt:'疲れたら椅子スクワットへ変更します。'},
+  {name:'プッシュアップ',target:'8回 × 3セット',secs:36,rest:60,id:'bI2qDaLrKCg',source:'Joanna Soh Official',cues:['身体を一枚の板のように保つ','胸を両手の間へ下ろす','反動を使わず押し戻す'],alt:'疲れたら膝つきに変更します。'},
+  {name:'ホローボディホールド',target:'20秒 × 3セット',secs:20,rest:45,id:'LlDNef_Ztsc',source:'GMB Fitness',cues:['腰を床につけたままにする','肩甲骨を床から軽く浮かせる','保てる範囲で手足を遠くへ伸ばす'],alt:'難しい場合：膝を曲げ、腕を体側に置きます。'}]}
+};
+let state={plan:null,index:0,voice:true,running:false,timer:null,remaining:0,phase:'work'};
+const $=s=>document.querySelector(s);const historyKey='cc-history-v02';
+function renderPlans(){ $('#plans').innerHTML=Object.entries(plans).map(([k,p])=>`<button class="plan-card" data-plan="${k}"><b>${k}</b><strong>${p.title}</strong><small>${p.items.map(x=>x.name).join(' ・ ')}<br>${p.time}</small></button>`).join('');document.querySelectorAll('[data-plan]').forEach(b=>b.onclick=()=>openPlan(b.dataset.plan)); }
+function getHistory(){try{return JSON.parse(localStorage.getItem(historyKey))||[]}catch{return[]}}
+function renderHistory(){const h=getHistory();$('#history').innerHTML=h.length?h.slice(0,5).map(x=>`<div class="history-item"><strong>${x.plan}メニュー完了</strong>　${x.date}<br><small>${x.title}・${x.minutes}分</small></div>`).join(''):'<div class="empty">まだ記録はありません。最初のワークアウトを始めましょう。</div>'}
+function openPlan(k){state.plan=k;state.index=0;$('#homeView').hidden=true;$('#workoutView').hidden=false;renderExercise()}
+function unloadVideo(){const f=$('#videoFrame');f.src='about:blank';f.hidden=true;$('#videoPlaceholder').hidden=false}
+function renderExercise(){stopTimer();unloadVideo();const p=plans[state.plan],e=p.items[state.index];$('#planLabel').textContent=`MENU ${state.plan}・${p.title}`;$('#exerciseName').textContent=e.name;$('#progressText').textContent=`${state.index+1} / ${p.items.length}`;$('#progressBar').style.width=`${(state.index+1)/p.items.length*100}%`;$('#target').textContent=e.target;$('#timer').textContent='準備OK';$('#cues').innerHTML=e.cues.map(c=>`<li>${c}</li>`).join('');$('#alternative').textContent=e.alt;$('#sourceName').textContent=`動画出典：${e.source}`;$('#sourceLink').href=`https://www.youtube.com/watch?v=${e.id}`;$('#prevBtn').disabled=state.index===0;$('#nextBtn').textContent=state.index===p.items.length-1?'完了':'次の種目';$('#startBtn').textContent='この種目を開始'}
+function loadVideo(){const e=plans[state.plan].items[state.index],f=$('#videoFrame');f.src=`https://www.youtube-nocookie.com/embed/${e.id}?playsinline=1&rel=0&hl=ja`;f.hidden=false;$('#videoPlaceholder').hidden=true}
+function speak(t){if(state.voice&&'speechSynthesis'in window){speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.lang='ja-JP';u.rate=.95;speechSynthesis.speak(u)}}
+function start(){if(state.running){stopTimer();$('#timer').textContent='一時停止';$('#startBtn').textContent='再開';return}const e=plans[state.plan].items[state.index];state.running=true;state.phase='work';state.remaining=e.secs;$('#startBtn').textContent='一時停止';speak(`${e.name}を始めます。${e.target}。フォームを丁寧に。`);tick();state.timer=setInterval(tick,1000)}
+function tick(){const e=plans[state.plan].items[state.index];$('#timer').textContent=`${state.phase==='work'?'運動':'休憩'} ${String(Math.floor(state.remaining/60)).padStart(2,'0')}:${String(state.remaining%60).padStart(2,'0')}`;if(state.remaining===10)speak('残り10秒です');if(state.remaining--<=0){if(state.phase==='work'){state.phase='rest';state.remaining=e.rest;speak(`${e.name}、1セットの目安が終了。休憩です`)}else{stopTimer();$('#timer').textContent='次のセットへ';$('#startBtn').textContent='もう1セット'}}}
+function stopTimer(){clearInterval(state.timer);state.timer=null;state.running=false}
+function move(n){const p=plans[state.plan];if(n>0&&state.index===p.items.length-1){const h=getHistory();h.unshift({plan:state.plan,title:p.title,date:new Date().toLocaleDateString('ja-JP'),minutes:parseInt(p.time)});localStorage.setItem(historyKey,JSON.stringify(h));speak('ワークアウト完了です。おつかれさまでした');goHome();return}state.index=Math.max(0,Math.min(p.items.length-1,state.index+n));renderExercise()}
+function goHome(){stopTimer();unloadVideo();$('#workoutView').hidden=true;$('#homeView').hidden=false;renderHistory()}
+$('#videoPlaceholder').onclick=loadVideo;$('#startBtn').onclick=start;$('#prevBtn').onclick=()=>move(-1);$('#nextBtn').onclick=()=>move(1);$('#backBtn').onclick=goHome;$('#voiceToggle').onclick=()=>{state.voice=!state.voice;$('#voiceToggle').textContent=state.voice?'🔊 音声ON':'🔇 音声OFF';$('#voiceToggle').setAttribute('aria-pressed',state.voice)};$('#exportBtn').onclick=()=>{const b=new Blob([JSON.stringify(getHistory(),null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='calisthenics-history.json';a.click();URL.revokeObjectURL(a.href)};
+if('serviceWorker'in navigator)navigator.serviceWorker.register('./sw.js');renderPlans();renderHistory();
